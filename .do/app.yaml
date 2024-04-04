@@ -1,0 +1,27 @@
+name: gddb-service
+services:
+- name: gddb-service
+  github:
+    repo: lminlone/gddb-service
+    branch: master
+    deploy_on_push: true
+  http_port: 8080
+  envs:
+  - key: DATABASE_URL
+    scope: RUN_TIME
+    value: file:./dev.db?connection_limit=1
+  - key: GITHUB_API_TOKEN
+    scope: RUN_TIME
+  - key: REPO_CACHE_TIME
+    scope: RUN_TIME
+  - key: GITHUB_WEBHOOK_SECRET
+    scope: RUN_TIME
+  - key: SERVICE_PORT
+    scope: RUN_TIME
+    value: "8080"
+  - key: SEED_DATA_GITHUB_OWNER
+    scope: RUN_TIME
+    value: lminlone
+  - key: SEED_DATA_GITHUB_REPO
+    scope: RUN_TIME
+    value: gddb

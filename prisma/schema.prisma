@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model githubCacheRepo {
+  id Int @id @default(autoincrement())
+  
+  name String
+  owner String
+  stars Int
+  license String
+  forks Int
+
+  branches githubCacheBranch[]
+
+  lastCacheTime DateTime @default(now())
+}
+
+model githubCacheBranch {
+  id Int @id @default(autoincrement())
+  name String
+  headSHA String
+  commitDatetime DateTime
+
+  repo githubCacheRepo @relation(fields: [repoId], references: [id])
+  repoId Int
+
+  updateDateTime DateTime @default(now())
+}
+
+model stats {
+  id Int @id @default(autoincrement())
+  statName String @unique
+  value Float
+}
