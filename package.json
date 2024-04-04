@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ./dist/main.js",
+    "build": "tsc",
+    "postinstall": "prisma generate",
     "prestart": "npm run build",
-    "build": "tsc"
+    "start": "node ./dist/main.js"
   },
   "author": "lminlone",
   "license": "MIT",
