@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "postinstall": "prisma generate",
+    "build": "tsc && prisma generate",
     "prestart": "npm run build",
     "start": "node ./dist/main.js"
   },
