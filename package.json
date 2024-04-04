@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && prisma generate",
+    "build": "tsc",
     "prestart": "npm run build",
+    "postinstall": "npx prisma migrate dev --name init",
     "start": "node ./dist/main.js"
   },
   "author": "lminlone",
