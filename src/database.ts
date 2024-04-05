@@ -101,7 +101,7 @@ export class Database
     }
 
     // Fetches any cached repo info, if the cache does not exist or 
-    public async getCachedRepo(owner: string, repoName: string, cacheExpirationTime: Duration): Promise<RepoMin>
+    public async getCachedRepo(owner: string, repoName: string, cacheExpirationTime: Duration | null = null): Promise<RepoMin>
     {
         let cachedRepoData: RepoMin = await this.prismaClient.githubCacheRepo.findFirst({
             where: { owner: owner, name: repoName }
@@ -110,8 +110,11 @@ export class Database
         if (!cachedRepoData)
             return null;
 
-        if (this.hasCacheExpired(cachedRepoData.lastCacheTime, cacheExpirationTime))
-            return null;
+        if (cacheExpirationTime)
+        {
+            if (this.hasCacheExpired(cachedRepoData.lastCacheTime, cacheExpirationTime))
+                return null;
+        }
 
         return cachedRepoData;
     }
@@ -178,7 +181,7 @@ export class Database
         }
     }
 
-    public async getCachedBranch(owner: string, repoName: string, branchName: string, cacheExpirationTime: Duration): Promise<BranchMin>
+    public async getCachedBranch(owner: string, repoName: string, branchName: string, cacheExpirationTime: Duration | null = null): Promise<BranchMin>
     {
         let prismaClient = Database.getPrismaClient();
 
@@ -197,8 +200,11 @@ export class Database
         if (!cachedData)
             return null;
 
-        if (this.hasCacheExpired(cachedData.updateDateTime, cacheExpirationTime))
-            return null;
+        if (cacheExpirationTime)
+        {
+            if (this.hasCacheExpired(cachedData.updateDateTime, cacheExpirationTime))
+                return null;
+        }
 
         return cachedData;
     }
@@ -239,7 +245,7 @@ export class Database
     {
         let lastCacheTime: DateTime = DateTime.fromJSDate(t);
         let tDelta = DateTime.now().diff(lastCacheTime);
-        if (tDelta < d)
+        if (tDelta > d)
         {
             return true;
         }

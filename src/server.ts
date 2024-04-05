@@ -70,33 +70,27 @@ export class Server
             let owner: string = uriSplit[0];
             let repoName: string = uriSplit[1];
 
-            // See if we have it already in cache
-            let cachedRepo = await db.getCachedRepo(owner, repoName, Duration.fromMillis(repoRecacheTimeMs));
-            
             // Fetch latest repo data from Github to recache it if cache has expired
-            if (!cachedRepo)
+            logger.info(`Cache miss for repo ${owner}/${repoName}`);
+
+            let octokit: Octokit = new Octokit({ auth: Config.get("GITHUB_API_TOKEN", "") });
+            let response = await octokit.rest.repos.get({ owner: owner, repo: repoName });
+            if (!response || !response.data.owner)
+                return;
+
+            let cachedRepo = await db.updateCachedRepo(response.data);
+
+            let branchList = (await octokit.rest.repos.listBranches({ owner: owner, repo: repoName })).data;
+            await db.updateCachedBranchList(response.data.owner.login ?? "", response.data.name, branchList);
+
+            let tasks = new Array<Promise<void>>;
+            for (let i in branchList)
             {
-                logger.info(`Cache miss for repo ${owner}/${repoName}`);
+                tasks.push(this.updateBranchCache(cachedRepo, branchList[i].name));
+            }
+            await Promise.all(tasks);
 
-                let octokit: Octokit = new Octokit({ auth: Config.get("GITHUB_API_TOKEN", "") });
-                let response = await octokit.rest.repos.get({ owner: owner, repo: repoName });
-                if (!response || !response.data.owner)
-                    return;
-
-                cachedRepo = await db.updateCachedRepo(response.data);
-
-                let branchList = (await octokit.rest.repos.listBranches({ owner: owner, repo: repoName })).data;
-                await db.updateCachedBranchList(response.data.owner.login ?? "", response.data.name, branchList);
-
-                let tasks = new Array<Promise<void>>;
-                for (let i in branchList)
-                {
-                    tasks.push(this.updateBranchCache(cachedRepo, branchList[i].name));
-                }
-                await Promise.all(tasks);
-
-                ++reposCachedCount;
-            } 
+            ++reposCachedCount;
         }
 
         logger.info(`Cached ${reposCachedCount} repo(s)`);
