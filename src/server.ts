@@ -80,7 +80,22 @@ export class Server
 
             let cachedRepo = await db.updateCachedRepo(response.data);
 
-            let branchList = (await octokit.rest.repos.listBranches({ owner: owner, repo: repoName })).data;
+            // Gather the full list of all branches
+            let branchList = new Array();
+            let pageId = 1;
+            while (true)
+            {
+                let listBranchResponse = await octokit.rest.repos.listBranches({ owner: owner, repo: repoName, page: pageId, per_page: 30 });
+                let branches = listBranchResponse.data;
+
+                branchList = branchList.concat(branches);
+
+                if (branches.length != 30)
+                    break;
+
+                pageId++;
+            }
+
             await db.updateCachedBranchList(response.data.owner.login ?? "", response.data.name, branchList);
 
             let tasks = new Array<Promise<void>>;
