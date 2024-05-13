@@ -1,12 +1,11 @@
 {
   "name": "gddb_service",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npx prisma migrate dev --name init",
     "prestart": "npm run build",
-    "postinstall": "npx prisma migrate dev --name init",
     "start": "node ./dist/main.js"
   },
   "author": "lminlone",
