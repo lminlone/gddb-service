@@ -45,7 +45,7 @@ export class Database
     {
         try
         {
-            return await this.isDatabaseSchemaUpToDate();
+            //return await this.isDatabaseSchemaUpToDate();
         }
         catch (e)
         {
